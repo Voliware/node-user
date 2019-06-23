@@ -1,0 +1,30 @@
+{
+  "name": "@voliware/node-user",
+  "version": "1.0.0",
+  "author": "Anthony Agostino",
+  "description": "Node User System",
+  "keywords": [
+    "user",
+    "users",
+    "login",
+    "register"
+  ],
+  "main": "app.js",
+  "dependencies": {
+    "@voliware/node-logger": "latest",
+    "sqlite3": "^4.0.8"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Voliware/node-user.git"
+  },
+  "bugs": {
+    "url": "https://github.com/Voliware/node-user/issues"
+  },
+  "homepage": "https://github.com/Voliware/node-user",
+  "license": "MIT"
+}
