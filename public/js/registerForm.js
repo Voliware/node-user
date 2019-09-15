@@ -11,7 +11,8 @@ class RegisterForm extends FormTemplate {
     constructor(){
         super({
             submitRequest: function(data){
-                return Router.user.register(data.email, data.password)
+                console.log(data);
+                return Routes.register(data.email, data.password, data.username)
                     .then(function(res){  
                         console.log(res);
                     });

@@ -1,23 +1,21 @@
 /* app */
-#userApp{
-    display:none;
+#user-app{
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
-/* login */
-#login {
-    width: 300px;
-}
-#login form button[type="submit"] {
+.user-form button[type="submit"] {
     background: #1f3e5d;
     height: 60px;
     width: 100%;
     color: white;
 }
-#login input{
+.user-form input{
     padding: 15px 10px;
 }
-#loginLinks {
+.user-form-links {
     padding: 0 20px;
 }
-#loginLinks a {
+#user-links a {
     color: #1f3e5d;
 }

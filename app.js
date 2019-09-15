@@ -25,7 +25,13 @@ function addRoutes(httpServer){
 
     });
     httpServer.addRoute("POST", "/user/register", function(request, response, data){
-
+        let result = userApp.registerUser(data.body.email, data.body.password);
+        if(result){
+            response.json({msg: "ok"});
+        }
+        else {
+            response.json({err: "Fail"})
+        }
     });
     httpServer.addRoute("POST", "/user/reset", function(request, response, data){
 

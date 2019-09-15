@@ -1,10 +1,11 @@
 const bcrypt = require('bcrypt');
 const MongoClient = require('mongodb').MongoClient;
 const Logger = require('@voliware/logger');
+const User = require('./user');
 const UserSession = require('./userSession');
 
 /**
- * UserApp for all user related things.
+ * User management application.
  */
 class UserApp {
     
@@ -12,8 +13,8 @@ class UserApp {
      * Constructor
      * @param {object} [options]
      * @param {object} [options.mongo]
-     * @param {string} [options.mongo.host="localhost"]- mongodb host
-     * @param {number} [options.mongo.port=27017]- mongodb port
+     * @param {string} [options.mongo.host="localhost"] - mongodb host
+     * @param {number} [options.mongo.port=27017] - mongodb port
      * @param {string} {options.mongo.username} - mongodb username
      * @param {string} [options.mongo.password] - mongodb password
      * @return {UserApp}
@@ -32,7 +33,10 @@ class UserApp {
         this.logger = new Logger("UserApp", this);
         
         this.options.mongo.url = this.createMongoUrl(this.options.mongo);
-        this.mongoClient = new MongoClient(this.options.mongo.url, {useNewUrlParser: true});
+        this.mongoClient = new MongoClient(this.options.mongo.url, {
+            useNewUrlParser: true,
+            useUnifiedTopology: true
+        });
         this.userCollection = null;
         this.connectToMongo();
         return this;
@@ -58,7 +62,7 @@ class UserApp {
             }
         }
        
-        url+= `${host}:${port}/voliware_node_user`;
+        url += `${host}:${port}/voliware_node_user`;
         return url;
     }
 
@@ -282,7 +286,7 @@ class UserApp {
         let self = this;
         let _userElement = null;
         let _sessionId = null;
-        return this.userCollection.getUser({email})
+        return this.getUser({email})
             .then(function(element){
                 if(element){
                     _userElement = element;
@@ -322,7 +326,7 @@ class UserApp {
                         sessions: {ip, browser}
                     }
                 };
-                return self.userCollection.updateUser(filter, params)
+                return self.updateUser(filter, params)
                     .catch(function(err){
                         // it's fine if it did not remove a session
                         return Promise.resolve();
@@ -336,7 +340,7 @@ class UserApp {
                         sessions: {sessionId: _sessionId, ip, browser}
                     }
                 }
-                return self.userCollection.updateUser(filter, sessionData);
+                return self.updateUser(filter, sessionData);
             })
             .then(function(){
                 // hashed, but.. no
@@ -366,7 +370,7 @@ class UserApp {
                 $elemMatch: {sessionId, ip, browser}
             }
         }
-        return this.userCollection.getUser(filter)
+        return this.getUser(filter)
             .then(function(element){
                 if(element){
                     // hashed, but.. no
@@ -400,7 +404,7 @@ class UserApp {
                 sessions: {sessionId}
             }
         };
-        return this.userCollection.updateUser(filter, params)
+        return this.updateUser(filter, params)
             .then(function(){
                 self.logger.info('Logged out user');
             })
@@ -421,7 +425,7 @@ class UserApp {
      */
     registerUser(email, password){
         let self = this;
-        return this.userCollection.getUser({email})
+        return this.getUser({email})
             .then(function(element){
                 if(!element){
                     return bcrypt.hash(password, 10)
@@ -437,7 +441,7 @@ class UserApp {
                 }
             })        
             .then(function(hash){
-                return self.userCollection.insertUser({
+                return self.insertUser({
                     email: email,
                     password: hash,
                     registerDate: Date.now(),

@@ -11,7 +11,7 @@ class ResetForm extends FormTemplate {
     constructor(){
         super({
             submitRequest: function(data){
-                return Router.user.reset(data.email)
+                return Routes.reset(data.email)
                     .then(function(res){  
                         console.log(res);
                     });

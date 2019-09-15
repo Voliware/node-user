@@ -1,24 +1,38 @@
 /**
- * UserApp module
+ * User login, registration, and password reset UI.
+ * Manages a user object and related cookies.
  * @extends {EventSystem}
  */
 class UserApp extends EventSystem {
 
     /**
      * Constructor
+     * @param {object} [options={}]
+     * @param {boolean} [options.cookieLogin=true]
      * @return {UserApp}
      */
-    constructor(){
+    constructor(options = {}){
         super();
         let self = this;
+
+        // settings
+        this.cookieLogin = options.cookieLogin ? options.cookieLogin : false;
+
         // elements 
-        this.wrapper = Template.select('#userApp');
-        this.loginForm = Template.select('#loginForm');
-        this.registerForm = Template.select('#registerForm');
-        this.resetForm = Template.select('#resetForm');
-        this.loginLink = Template.select('#loginLink');
-        this.registerLink = Template.select('#registerLink');
-        this.resetPasswordLink = Template.select('#resetLink');
+        this.wrapper = Template.select('#user-app');
+        this.loginForm = Template.select('#user-login-form');
+        this.registerForm = Template.select('#user-register-form');
+        this.resetForm = Template.select('#user-reset-form');
+        this.loginLink = Template.select('#user-login-link');
+        this.registerLink = Template.select('#user-register-link');
+        this.resetPasswordLink = Template.select('#user-reset-link');
+        
+        this.user = new User();
+        this.userElement = Template.select('#user');
+        this.userElement.on('logout', function(){
+            self.emit('logout');
+        });
+
         // handlers
         this.loginForm.on('success', function(data){
             self.emit('login.success');
@@ -35,6 +49,26 @@ class UserApp extends EventSystem {
             self.displayForm('register');
             self.displayLinks('register');
         });
+        return this;
+    }
+
+    /**
+     * Set the user data
+     * @param {object} data
+     * @return {UserApp}
+     */
+    setUserData(data){
+        this.user.set(data);
+        return this;
+    }
+
+    /**
+     * Render the user element
+     * @param {object} data
+     * @return {UserApp}
+     */
+    render(data){
+        this.userElement.render(data);
         return this;
     }
 
@@ -59,19 +93,26 @@ class UserApp extends EventSystem {
                 this.loginForm.hide();
                 this.registerForm.hide();
                 this.resetForm.show();
-                return this;
+                break;
             case 'register':
                 this.resetForm.hide();
                 this.loginForm.hide();
                 this.registerForm.show();
-                return this;
-            default:
+                break;
             case 'login':
                 this.resetForm.hide();
                 this.registerForm.hide();
                 this.loginForm.show();
-                return this;
+                break;
+            case 'none':
+            default:
+                this.loginForm.hide();
+                this.registerForm.hide();
+                this.resetForm.hide();
+                break;
         }
+
+        return this;
     }
 
     /**
@@ -107,9 +148,10 @@ class UserApp extends EventSystem {
      */
     loginWithTokenCookie(){
         let self = this;
-        return Router.user.loginWithTokenCookie()
+        return Routes.loginWithTokenCookie()
             .then(function(data){
                 self.emit('login.success', data.body);
+                self.displayForm('none');
             })
             .catch(function(err){
                 console.log(err);
@@ -119,15 +161,20 @@ class UserApp extends EventSystem {
 
     /**
      * Initialize by trying to login with a cookie.
-     * If successful, emits login.success.
-     * If cookie does not exist, emits login.required.
+     * If successful, emits login.success and hides 
+     * the login, register, and reset forms.
+     * If cookie does not exist, emits login.required
+     * and displays the login form.
      * @return {Promise}
      */
     initialize(){
-        if(Cookies.get('sessionId')){
-            return this.loginWithTokenCookie();
+        if(this.cookieLogin){
+            if(Cookies.get('sessionId')){
+                return this.loginWithTokenCookie();
+            }
         }
         else {
+            this.displayForm('login');
             this.emit('login.required')
             return Promise.resolve();
         }

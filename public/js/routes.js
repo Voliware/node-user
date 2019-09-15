@@ -23,21 +23,22 @@ class Routes {
         });
     }
     static login(username, password){
-        return fetch("/login", {
+        return fetch("/user/login", {
             method: "post",
             body: {username, password}
         });
     }
     static logout(){
-        return fetch("/logout", {method: "post"});
+        return fetch("/user/logout", {method: "post"});
     }
-    static register(user){
-        return fetch("/register", {
+    static register(email, password, username){
+        let body = JSON.stringify({email, password, username});
+        return fetch("/user/register", {
             method: "post",
-            body: user.toJson()
+            body: body
         });
     }
     static resetPassword(){
-        return fetch("/resetPassword", {method: "post"});
+        return fetch("/user/reset", {method: "post"});
     }
 }

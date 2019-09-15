@@ -11,7 +11,7 @@ class LoginForm extends FormTemplate {
     constructor(){
         super({
             submitRequest: function(data){
-                return Router.user.login(data.email, data.password)
+                return Routes.login(data.email, data.password)
                     .then(function(res){  
                         console.log(res);
                     });

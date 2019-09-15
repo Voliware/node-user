@@ -4,67 +4,80 @@
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
         <title>Node-User</title>
-        <link rel="stylesheet" href="./css/style.css">
+        <link rel="stylesheet" href="./css/style.min.css">
         <link rel="icon" type="image/png" href="./img/favicon.png">
     </head>
     <body>
-        <main class="flex-center">
-            <div class="hidden" id="userApp">
-                <template-form-login id="loginForm">
-                    <form class="form">
-                        <div class="form-header">
-                            <h1 class="login-header">Login</h1>
-                        </div>
-                        <div class="form-body">
-                            <input type="email" name="email" placeholder="email">
-                            <input type="password" name="password" placeholder="password">
-                        </div>
-                        <div class="form-footer">
-                            <button class="btn block" id="loginFormSubmitBtn" type="submit">login</button>
-                        </div>
-                    </form>
-                </template-form-login>
-                <template-form-register class="hidden" id="registerForm">
-                    <form class="form">
-                        <div class="form-header">
-                            <h1 class="login-header">Register</h1>
-                        </div>
-                        <div class="form-body">
-                            <input type="email" name="email" placeholder="email">
-                            <input type="password" name="password" placeholder="password">
-                            <input type="password" name="confirm" placeholder="confirm password">
-                        </div>
-                        <div class="form-footer">
-                            <button class="btn block" id="registerFormSubmitBtn" type="submit">register</button>
-                        </div>
-                    </form>
-                </template-form-register>
-                <template-form-reset class="hidden" id="resetForm">
-                    <form class="form">
-                        <div class="form-header">
-                            <h1 class="login-header">Reset Password</h1>
-                        </div>
-                        <div class="form-body">
-                            <input type="email" name="email" placeholder="email">
-                        </div>
-                        <div class="form-footer">
-                            <button class="btn block" id="resetFormSubmitBtn" type="submit">reset</button>
-                        </div>
-                    </form>
-                </template-form-reset>
-                <div id="loginLinks">
-                    <div>
-                        <a id="loginLink" class="hidden" href="#">I already have an account</a>
+        <div id="user-app">
+            <template-user class="hidden" id="user">
+                <div class="user-avatar">
+                    <span data-name="avatar"></span>
+                </div>
+                <div class="user-name">
+                    <span data-name="name"></span>
+                </div>
+                <div class="user-email">
+                    <span data-name="email"></span>
+                </div>
+                <div class="user-logout">
+                    <button name="logout">Logout</button>
+                </div>
+            </template-user>
+            <template-form-login class="hidden" id="user-login-form">
+                <form class="form">
+                    <div class="form-header">
+                        <h1 class="user-app-header">Login</h1>
                     </div>
-                    <div>
-                        <a id="registerLink" href="#">I don't have an account</a>
+                    <div class="form-body">
+                        <input type="email" name="email" placeholder="email">
+                        <input type="password" name="password" placeholder="password">
                     </div>
-                    <div>
-                        <a id="resetLink" href="#">I forgot my password</a>
+                    <div class="form-footer">
+                        <button class="btn block" id="login-form-submit" type="submit">login</button>
                     </div>
+                </form>
+            </template-form-login>
+            <template-form-register class="hidden" id="user-register-form">
+                <form class="form">
+                    <div class="form-header">
+                        <h1 class="user-app-header">Register</h1>
+                    </div>
+                    <div class="form-body">
+                        <input type="email" name="email" placeholder="email">
+                        <input type="text" name="username" placeholder="User Name">
+                        <input type="password" name="password" placeholder="Password">
+                        <input type="password" name="confirm" placeholder="Confirm Password">
+                    </div>
+                    <div class="form-footer">
+                        <button class="btn block" id="user-register-form-submit" type="submit">register</button>
+                    </div>
+                </form>
+            </template-form-register>
+            <template-form-reset class="hidden" id="user-reset-form">
+                <form class="form">
+                    <div class="form-header">
+                        <h1 class="user-app-header">Reset Password</h1>
+                    </div>
+                    <div class="form-body">
+                        <input type="email" name="email" placeholder="email">
+                    </div>
+                    <div class="form-footer">
+                        <button class="btn block" id="user-reset-form-submit" type="submit">reset</button>
+                    </div>
+                </form>
+            </template-form-reset>
+            <div class="user-links">
+                <div>
+                    <a id="user-login-link" class="hidden" href="#">I already have an account</a>
+                </div>
+                <div>
+                    <a id="user-register-link" href="#">I don't have an account</a>
+                </div>
+                <div>
+                    <a id="user-reset-link" href="#">I forgot my password</a>
                 </div>
             </div>
-            <script src="./js/app.min.js"></script>
-        </main>
+        </div>
+        <script src="./js/app.min.js"></script>
     </body>
 </html>
