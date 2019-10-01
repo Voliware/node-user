@@ -1,8 +1,11 @@
+/* general */
+html {
+    font-family: sans-serif;
+}
 /* app */
 #user-app{
-    display: flex;
-    align-items: center;
-    justify-content: center;
+    margin:auto;
+    max-width:400px;
 }
 .user-form button[type="submit"] {
     background: #1f3e5d;
@@ -18,4 +21,42 @@
 }
 #user-links a {
     color: #1f3e5d;
+}
+/* forms */
+.form-header{
+    padding:5px;
+}
+.form-header h1{
+    margin:0;
+}
+.form-row {
+    padding:5px;
+}
+.form-input{
+    padding:5px;
+    width:100%;
+}
+.form-footer{
+    padding:5px;
+}
+.form-button{
+    border: none;
+    color: white;
+    font-weight: bold;
+    padding: 10px;
+    width: 100%;
+}
+[type="submit"]{
+    background:teal;
+}
+/* nav */
+.user-links{
+    padding:5px;
+}
+.user-link {
+    color:blue;
+    text-decoration: none;
+}
+.user-link:visited {
+    color:blue;
 }

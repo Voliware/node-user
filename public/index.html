@@ -26,55 +26,69 @@
             <template-form-login class="hidden" id="user-login-form">
                 <form class="form">
                     <div class="form-header">
-                        <h1 class="user-app-header">Login</h1>
+                        <h1>Login</h1>
                     </div>
                     <div class="form-body">
-                        <input type="email" name="email" placeholder="email">
-                        <input type="password" name="password" placeholder="password">
+                        <div class="form-row">
+                            <input class="form-input" type="username" name="username" placeholder="Username">
+                        </div>
+                        <div class="form-row">
+                            <input class="form-input" type="password" name="password" placeholder="Password">
+                        </div>  
                     </div>
                     <div class="form-footer">
-                        <button class="btn block" id="login-form-submit" type="submit">login</button>
+                        <button class="form-button" type="submit">LOGIN</button>
                     </div>
                 </form>
             </template-form-login>
             <template-form-register class="hidden" id="user-register-form">
                 <form class="form">
                     <div class="form-header">
-                        <h1 class="user-app-header">Register</h1>
+                        <h1>Register</h1>
                     </div>
                     <div class="form-body">
-                        <input type="email" name="email" placeholder="email">
-                        <input type="text" name="username" placeholder="User Name">
-                        <input type="password" name="password" placeholder="Password">
-                        <input type="password" name="confirm" placeholder="Confirm Password">
+                        <div class="form-row">
+                            <input class="form-input" type="email" name="email" placeholder="Email">
+                        </div>
+                        <div class="form-row">
+                            <input class="form-input" type="text" name="username" placeholder="User Name">
+                        </div>
+                        <div class="form-row">
+                            <input class="form-input" type="password" name="password" placeholder="Password">
+                        </div>
+                        <div class="form-row">
+                            <input class="form-input" type="password" name="confirm" placeholder="Confirm Password">
+                        </div>
                     </div>
                     <div class="form-footer">
-                        <button class="btn block" id="user-register-form-submit" type="submit">register</button>
+                        <button class="form-button" type="submit">REGISTER</button>
                     </div>
                 </form>
             </template-form-register>
             <template-form-reset class="hidden" id="user-reset-form">
                 <form class="form">
                     <div class="form-header">
-                        <h1 class="user-app-header">Reset Password</h1>
+                        <h1>Reset Password</h1>
                     </div>
                     <div class="form-body">
-                        <input type="email" name="email" placeholder="email">
+                        <div class="form-row">
+                            <input class="form-input" type="email" name="email" placeholder="Email">
+                        </div>
                     </div>
                     <div class="form-footer">
-                        <button class="btn block" id="user-reset-form-submit" type="submit">reset</button>
+                        <button class="form-button" type="submit">RESET</button>
                     </div>
                 </form>
             </template-form-reset>
             <div class="user-links">
                 <div>
-                    <a id="user-login-link" class="hidden" href="#">I already have an account</a>
+                    <a class="user-link hidden" id="user-login-link" href="#">I already have an account</a>
                 </div>
                 <div>
-                    <a id="user-register-link" href="#">I don't have an account</a>
+                    <a class="user-link hidden" id="user-register-link" href="#">I don't have an account</a>
                 </div>
                 <div>
-                    <a id="user-reset-link" href="#">I forgot my password</a>
+                    <a class="user-link hidden" id="user-reset-link" href="#">I forgot my password</a>
                 </div>
             </div>
         </div>

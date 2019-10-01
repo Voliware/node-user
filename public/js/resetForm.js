@@ -9,14 +9,7 @@ class ResetForm extends FormTemplate {
      * @return {ResetForm}
      */
     constructor(){
-        super({
-            submitRequest: function(data){
-                return Routes.reset(data.email)
-                    .then(function(res){  
-                        console.log(res);
-                    });
-            }
-        });
+        super({submitRequest: Routes.reset});
         return this;
     }
 }

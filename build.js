@@ -1,5 +1,5 @@
 const NodeBuild = require('@voliware/node-build');
-const version = "1.0.0";
+const version = require('./package.json').version;
 
 // js
 const jsInput = [

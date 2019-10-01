@@ -16,37 +16,41 @@ class UserApp extends EventSystem {
         let self = this;
 
         // settings
-        this.cookieLogin = options.cookieLogin ? options.cookieLogin : false;
+        this.cookieLogin = options.cookieLogin ? options.cookieLogin : true;
 
         // elements 
-        this.wrapper = Template.select('#user-app');
-        this.loginForm = Template.select('#user-login-form');
-        this.registerForm = Template.select('#user-register-form');
-        this.resetForm = Template.select('#user-reset-form');
-        this.loginLink = Template.select('#user-login-link');
-        this.registerLink = Template.select('#user-register-link');
-        this.resetPasswordLink = Template.select('#user-reset-link');
+        this.wrapper = Template.selectFirst('#user-app');
+        this.loginForm = Template.selectFirst('#user-login-form');
+        this.registerForm = Template.selectFirst('#user-register-form');
+        this.resetForm = Template.selectFirst('#user-reset-form');
+        this.loginLink = Template.selectFirst('#user-login-link');
+        this.registerLink = Template.selectFirst('#user-register-link');
+        this.resetPasswordLink = Template.selectFirst('#user-reset-link');
         
         this.user = new User();
-        this.userElement = Template.select('#user');
+        this.userElement = Template.selectFirst('#user');
         this.userElement.on('logout', function(){
-            self.emit('logout');
+            self.logout();
         });
 
         // handlers
-        this.loginForm.on('success', function(data){
-            self.emit('login.success');
+        this.loginForm.on('success', function(){
+            self.displayComponent('logout');
+        }); 
+        this.registerForm.on('success', function(){
+            self.displayComponent('logout');
         });
+
         Template.on(this.loginLink, 'click', function(){
-            self.displayForm('login');
+            self.displayComponent('login');
             self.displayLinks('login');
         });
         Template.on(this.resetPasswordLink, 'click', function(){
-            self.displayForm('reset');
+            self.displayComponent('reset');
             self.displayLinks('reset');
         });
         Template.on(this.registerLink, 'click', function(){
-            self.displayForm('register');
+            self.displayComponent('register');
             self.displayLinks('register');
         });
         return this;
@@ -83,6 +87,35 @@ class UserApp extends EventSystem {
     }
 
     /**
+     * Toggle the display of the components
+     * @param {string} component - the component to show, hide the rest
+     * @return {UserApp}
+     */
+    displayComponent(component){
+        switch(component){
+            case 'reset':
+                this.displayForm('reset');
+                this.displayLinks('reset');
+                break;
+            case 'register':
+                this.displayForm('register');
+                this.displayLinks('register');
+                break;
+            case 'logout':
+                this.displayForm('logout');
+                this.displayLinks('logout');
+                break;
+            case 'login':
+            default:
+                this.displayForm('login');
+                this.displayLinks('login');
+                break;
+        }
+
+        return this;
+    }
+
+    /**
      * Toggle the display of the forms
      * @param {string} form - the form to show, hide the rest
      * @return {UserApp}
@@ -92,23 +125,27 @@ class UserApp extends EventSystem {
             case 'reset':
                 this.loginForm.hide();
                 this.registerForm.hide();
+                this.userElement.hide();
                 this.resetForm.show();
                 break;
             case 'register':
                 this.resetForm.hide();
                 this.loginForm.hide();
+                this.userElement.hide();
                 this.registerForm.show();
                 break;
-            case 'login':
-                this.resetForm.hide();
-                this.registerForm.hide();
-                this.loginForm.show();
-                break;
-            case 'none':
-            default:
+            case 'logout':
                 this.loginForm.hide();
                 this.registerForm.hide();
                 this.resetForm.hide();
+                this.userElement.show();
+                break;
+            case 'login':
+            default:
+                this.resetForm.hide();
+                this.registerForm.hide();
+                this.userElement.hide();
+                this.loginForm.show();
                 break;
         }
 
@@ -124,21 +161,28 @@ class UserApp extends EventSystem {
         switch(links){
             case 'register':
                 Template.hide(this.registerLink);
-                Template.show(this.loginLink);
                 Template.show(this.resetPasswordLink);
-                return this;
+                Template.show(this.loginLink);
+                break;
             case 'reset':
                 Template.hide(this.resetPasswordLink);
                 Template.show(this.loginLink);
                 Template.show(this.registerLink);
-                return this;
-            default:
+                break;
+            case 'logout':
+                Template.hide(this.registerLink);
+                Template.hide(this.resetPasswordLink);
+                Template.hide(this.loginLink);
+                break;
             case 'login':
+            default:
                 Template.hide(this.loginLink);
                 Template.show(this.registerLink);
                 Template.show(this.resetPasswordLink);
-                return this;
+                break;
         }
+        
+        return this;
     }
 
     /**
@@ -146,17 +190,25 @@ class UserApp extends EventSystem {
      * which will use a sessionId cookie on the backend.
      * @return {Promise}
      */
-    loginWithTokenCookie(){
-        let self = this;
-        return Routes.loginWithTokenCookie()
-            .then(function(data){
-                self.emit('login.success', data.body);
-                self.displayForm('none');
-            })
-            .catch(function(err){
-                console.log(err);
-                self.emit('login.required')
-            });
+    async loginWithSessionId(){
+        let response = await Routes.login();
+        if(response.status === 200){
+            this.displayComponent('logout');
+        }
+        else {
+            this.displayComponent('login');
+        }
+    }
+
+    /**
+     * Logout.
+     * @return {Promise}
+     */
+    async logout(){
+        let response = await Routes.logout();
+        if(response.status === 200){
+            this.displayComponent('login');
+        }
     }
 
     /**
@@ -168,15 +220,6 @@ class UserApp extends EventSystem {
      * @return {Promise}
      */
     initialize(){
-        if(this.cookieLogin){
-            if(Cookies.get('sessionId')){
-                return this.loginWithTokenCookie();
-            }
-        }
-        else {
-            this.displayForm('login');
-            this.emit('login.required')
-            return Promise.resolve();
-        }
+        return this.loginWithSessionId();
     }
 }

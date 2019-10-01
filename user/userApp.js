@@ -1,4 +1,5 @@
 const bcrypt = require('bcrypt');
+const Mongo = require('mongodb');
 const MongoClient = require('mongodb').MongoClient;
 const Logger = require('@voliware/logger');
 const User = require('./user');
@@ -30,7 +31,10 @@ class UserApp {
         };
         Object.extend(this.options, options);
         
-        this.logger = new Logger("UserApp", this);
+        this.logger = new Logger("UserApp", {
+            level: "debug",
+            context: this
+        });
         
         this.options.mongo.url = this.createMongoUrl(this.options.mongo);
         this.mongoClient = new MongoClient(this.options.mongo.url, {
@@ -88,13 +92,13 @@ class UserApp {
     /**
      * Process a filter object used for queries.
      * If the filter has an _id property, replace
-     * it with a new mongo.ObjectID.
+     * it with a new Mongo.ObjectID.
      * @param {object} filter 
      * @return {object}
      */
     processFilter(filter){
         if(typeof filter._id !== "undefined"){
-            filter._id = new mongo.ObjectID(filter._id);
+            filter._id = new Mongo.ObjectID(filter._id);
         }
         return filter;
     }
@@ -135,33 +139,33 @@ class UserApp {
      * @param {object} filter - query filter
      * @return {Promise}
      */
-    getUser(filter){
+    async getUser(filter){
         this.logger.debug('Getting user with filter');
         this.logger.debug(filter);
 
         filter = this.processFilter(filter);
         let self = this;
-        return this.userCollection.findOne(filter)
-            .then(function(element) {
-                if(element){
-                    self.logger.debug('Got user');
-                    self.logger.debug(element);
-                }
-                else {
-                    self.logger.debug('Did not find user');
-                }
-                return element;
-            })
+        let user = await this.userCollection.findOne(filter)
             .catch(function(err){
-                self.logger.error('Failed to query user');
+                self.logger.error('Failed to get user');
                 self.logger.error(err);
                 return Promise.reject(err);
             });
+
+        if(user){
+            this.logger.debug('Got user');
+            this.logger.verbose(user);
+        }
+        else {
+            this.logger.debug('Did not find user');
+        }
+        return user;
     }
 
     /**
      * Insert a user into the collection
      * @param {object} user
+     * @param {string} user.username
      * @param {string} user.email
      * @param {string} user.passwordHash
      * @param {string[]} [user.friends]
@@ -170,25 +174,79 @@ class UserApp {
      * @param {number} [user.registerDate]
      * @return {Promise}
      */
-    insertUser(user){
+    async insertUser(user){
         this.logger.debug('Inserting user with data');
         this.logger.debug(user);
 
         let self = this;
-        return this.userCollection.insertOne(user)
-            .then(function(res) {
-                if(res.insertedCount){
-                    self.logger.info('Inserted user into db');
-                    return res;
-                }
-                else {
-                    return Promise.reject('Inserted count was 0');
-                }
-            })
+        let result = await this.userCollection.insertOne(user)
             .catch(function(err){
                 self.logger.error('Failed to insert user into db');
                 self.logger.error(err);
                 return Promise.reject(err)
+            });
+
+        // check result
+        if(result.insertedCount){
+            this.logger.info('Inserted user into db');
+            return result;
+        }
+        else {
+            return Promise.reject('Inserted count was 0');
+        }
+    }
+
+    /**
+     * Add a session for a user
+     * with an id, IP, and browser name.
+     * @param {string} userId 
+     * @param {string} sessionId 
+     * @param {string} ip 
+     * @param {string} browser 
+     * @return {Promise}
+     */
+    addSession(userId, sessionId, ip, browser){
+        let filter = {_id: userId};
+        let data = {
+            $addToSet: {
+                sessions: {sessionId, ip, browser}
+            }
+        }
+        
+        let self = this;
+        return this.updateUser(filter, data)
+            .catch(function(error){
+                self.logger.error(`Failed to add session`);
+                self.logger.error(error);
+                return Promise.reject(error)
+            });
+    }
+
+    /**
+     * Remove all sessions from a user that
+     * match an IP and browser name.
+     * @param {string} userId 
+     * @param {string} ip 
+     * @param {string} browser 
+     * @return {Promise}
+     */
+    deleteSessions(userId, ip, browser){
+        // remove any old sessions bound to the user
+        // search by user id
+        let filter = {_id: userId};
+
+        // remove entries that match ip/browser (pull out of array)
+        let params = {
+            $pull: {
+                sessions: {ip, browser}
+            }
+        };
+
+        let self = this;
+        return this.updateUser(filter, params)
+            .catch(function(err){
+                // it's fine if it did not remove a session
+                self.logger.debug("Removed 0 sessions")
             });
     }
 
@@ -196,6 +254,7 @@ class UserApp {
      * Update a user in the collection
      * @param {object} filter
      * @param {object} user
+     * @param {string} [user.username]
      * @param {string} [user.email]
      * @param {string} [user.passwordHash]
      * @param {string[]} [user.friends]
@@ -204,27 +263,27 @@ class UserApp {
      * @param {number} [user.registerDate]
      * @return {Promise}
      */
-    updateUser(filter, user){
+    async updateUser(filter, user){
         this.logger.debug('Inserting user with data');
         this.logger.debug(user);
 
         let self = this;
         filter = this.processFilter(filter);
-        return this.userCollection.updateOne(filter, user)
-            .then(function(res) {
-                if(res.modifiedCount){
-                    self.logger.info('Updated user in db');
-                    return res;
-                }
-                else {
-                    return Promise.reject('Modified count was 0');
-                }
-            })
+        let res = await this.userCollection.updateOne(filter, user)
             .catch(function(err){
                 self.logger.error('Failed to update user in db');
                 self.logger.error(err);
                 return Promise.reject(err)
             });
+
+        
+        if(res.modifiedCount){
+            self.logger.info('Updated user in db');
+            return res;
+        }
+        else {
+            return Promise.reject('Modified count was 0');
+        }
     }
 
     /**
@@ -269,122 +328,79 @@ class UserApp {
 
     /**
      * Login a user.
-     * Find the user based on email.
+     * Find the user based on username.
      * Validate the supplied password.
      * Log them in if the password is valid.
      * Add a new session to their session list.
-     * @param {string} email 
+     * @param {string} username 
      * @param {string} password - plaintext password
      * @param {string} ip
      * @param {string} browser 
      * @return {Promise}
      */
-    loginUser(email, password, ip, browser){
+    async loginUser(username, password, ip, browser){
         this.logger.debug("Logging in user with data");
-        this.logger.debug(`email:${email}, password:***, ip:${ip}, browser:${browser}`);
+        this.logger.debug(`username:${username}, password:***, ip:${ip}, browser:${browser}`);
 
-        let self = this;
-        let _userElement = null;
-        let _sessionId = null;
-        return this.getUser({email})
-            .then(function(element){
-                if(element){
-                    _userElement = element;
-                    return bcrypt.compare(password, hash)
-                        .then(function(isValid){
-                            if(isValid){
-                                this.logger.debug("Password is valid");
-                            }
-                            else {
-                                this.logger.debug("Password is invalid");
-                            }
-                            return isValid;
-                        })
-                        .catch(function(err){
-                            this.logger.error("Failed comparing hash password");
-                            return Promise.reject(err);
-                        });
-                }
-                else {
-                    return Promise.reject(UserApp.error.loginFail);
-                }
-            })
-            .then(function(isValid){
-                if(isValid){
-                    return UserSession.generateSessionId();
-                }
-                else {
-                    return Promise.reject(UserApp.error.loginFail);
-                }
-            })
-            .then(function(sessionId){
-                _sessionId = sessionId;
-                // remove any old sessions
-                let filter = {_id: _userElement._id};
-                let params = {
-                    $pull: {
-                        sessions: {ip, browser}
-                    }
-                };
-                return self.updateUser(filter, params)
-                    .catch(function(err){
-                        // it's fine if it did not remove a session
-                        return Promise.resolve();
-                    })
-            })
-            .then(function(){
-                // add session data
-                let filter = {_id: _userElement._id};
-                let sessionData = {
-                    $addToSet: {
-                        sessions: {sessionId: _sessionId, ip, browser}
-                    }
-                }
-                return self.updateUser(filter, sessionData);
-            })
-            .then(function(){
-                // hashed, but.. no
-                delete _userElement.password;
-                return {user: _userElement, sessionId: _sessionId};
-            })
-            .catch(function(err){
-                self.logger.error(`Failed to login user ${email}`);
-                self.logger.error(err);
-                return Promise.reject(err)
-            });
+        // get user
+        let user = await this.getUser({username});
+        if(!user){
+            this.logger.debug("Cannot find user");
+            return Promise.reject(UserApp.error.loginFail);
+        }
+
+        // check password
+        let isValid = await this.comparePassword(password, user.password);
+        if(!isValid){
+            this.logger.debug("Password is invalid");
+            return Promise.reject(UserApp.error.loginFail);
+        }
+        
+        // delete all old ones matching same ip/browser
+        await this.deleteSessions(user._id, ip, browser);
+        
+        // add new session
+        user.sessionId = await UserSession.generateSessionId();
+        await this.addSession(user._id, user.sessionId, ip, browser);
+        
+        // hashed, but.. no
+        delete user.password;
+
+        return user;
     }
 
     /**
      * Get a user with session data.
      * The sessionId, ip, and browser must match at
      * least one object the sessions array of a user document.
-     * @param {object} sessionId 
+     * @param {string} sessionId 
      * @param {string} ip 
      * @param {string} browser 
      * @return {Promise}
      */
-    getUserWithSessionData(sessionId, ip, browser){
+    async loginUserWithSessionId(sessionId, ip, browser){
         let self = this;
         let filter = {
             sessions: {
                 $elemMatch: {sessionId, ip, browser}
             }
         }
-        return this.getUser(filter)
-            .then(function(element){
-                if(element){
-                    // hashed, but.. no
-                    delete element.password;
-                    return element;
-                }
-                else {
-                    return Promise.reject("User not found with supplied session data");
-                }
-            })
+
+        // get user from session data
+        let user = await this.getUser(filter)
             .catch(function(err){
-                self.logger.error('Failed to get user with session data');
-                return Promise.reject("Please login with credentials")
+                self.logger.error(err);
+                return Promise.reject(err)
             });
+
+        // remove password
+        // add session id
+        if(user){
+            delete user.password;
+            user.sessionId = sessionId;
+        }
+
+        return user;
     }
 
     /**
@@ -394,6 +410,7 @@ class UserApp {
      * @return {Promise}
      */
     logoutUser(sessionId){
+        let self = this;
         let filter = {
             sessions: {
                 $elemMatch: {sessionId}
@@ -415,47 +432,94 @@ class UserApp {
     }
 
     /**
-     * Register a user.
-     * Performs a check for email uniqueness.
-     * Hashes the incoming password.
-     * Inserts the user into the collection.
-     * @param {string} email
-     * @param {string} password
+     * Validate a username by checking 
+     * for its uniqueness.
+     * @param {string} username 
      * @return {Promise}
      */
-    registerUser(email, password){
-        let self = this;
-        return this.getUser({email})
-            .then(function(element){
-                if(!element){
-                    return bcrypt.hash(password, 10)
-                        .catch(function(err){
-                            self.logger.error("Failed to hash password");
-                            self.logger.error(err);
-                            return Promise.reject(err);
-                        });
-                }
-                else {
-                    self.logger.debug(`User ${email} already exists`);
-                    return Promise.reject(UserApp.error.userExists);
-                }
-            })        
-            .then(function(hash){
-                return self.insertUser({
-                    email: email,
-                    password: hash,
-                    registerDate: Date.now(),
-                    level: User.level.user
-                });
-            })
-            .then(function(result){
-                self.logger.info(`Registered user ${email}`);
-            })
-            .catch(function(err){
-                self.logger.error(`Failed to register user ${email}`);
-                self.logger.error(err);
-                return Promise.reject(err)
+    async validateUsername(username){
+        // try to get user with this username
+        let element = await this.getUser({username})
+            .catch(function(error){
+                self.logger.error('Failed to run user query');
+                self.logger.error(error);
+                return Promise.reject(error)
             });
+
+        // if it exists, reject
+        if(element){
+            this.logger.debug(`User ${username} already exists`);
+            return Promise.reject(UserApp.error.userExists);
+        }
+
+        return Promise.resolve();
+    }
+
+    /**
+     * Compare a password with a hash.
+     * Return a promise with a true result
+     * if the passwords match.
+     * @param {string} password 
+     * @param {string} hash 
+     * @return {Promise}
+     */
+    async comparePassword(password, hash){
+        let self = this;
+        let valid = await bcrypt.compare(password, hash)
+            .catch(function(err){
+                self.logger.error("Failed comparing hash password");
+                return Promise.reject(err);
+            });
+
+        return valid;
+    }
+
+    /**
+     * Hash a password
+     * @param {string} password 
+     * @return {Promise}
+     */
+    hashPassword(password){
+        let self = this;
+        return bcrypt.hash(password, 10)
+            .catch(function(error){
+                self.logger.error('Failed to hash password');
+                self.logger.error(error);
+                return Promise.reject(error)
+            });
+    }
+
+    /**
+     * Register a user.
+     * Performs a check for username uniqueness.
+     * Hashes the incoming password.
+     * Inserts the user into the collection.
+     * @param {string} username
+     * @param {string} password
+     * @param {string} email
+     * @return {Promise}
+     */
+    async registerUser(username, password, email){
+        try{
+            await this.validateUsername(username);
+            let hash = await this.hashPassword(password);
+            let user = new User({
+                username: username,
+                password: hash,
+                email: email,
+                registerDate: Date.now(),
+                level: User.level.user
+            });
+            user = user.toObject();
+            await this.insertUser(user);
+            this.logger.info(`Registered user ${username}`);
+            return user;
+        }
+        catch(error){
+            this.logger.error(`Failed to register user ${username}`);
+            this.logger.error(error);
+            return Promise.reject(error)
+        }
     }
 
     /**
@@ -514,9 +578,9 @@ class UserApp {
     }
 }
 UserApp.error = {
-    userExists: "A user with this email already exists",
+    userExists: "A user with this name already exists",
     userNotFound: "The user was not found",
-    loginFail: "The email or password is incorrect",
+    loginFail: "The username, email, or password is incorrect",
     resetPasswordFail: "Failed to reset password"
 };
 

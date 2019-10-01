@@ -9,14 +9,7 @@ class LoginForm extends FormTemplate {
      * @return {LoginForm}
      */
     constructor(){
-        super({
-            submitRequest: function(data){
-                return Routes.login(data.email, data.password)
-                    .then(function(res){  
-                        console.log(res);
-                    });
-            }
-        });
+        super({submitRequest: Routes.login});
         return this;
     }
 }
