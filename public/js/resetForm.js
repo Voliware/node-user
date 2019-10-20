@@ -6,10 +6,10 @@ class ResetForm extends FormTemplate {
 
     /**
      * Constructor
-     * @return {ResetForm}
+     * @returns {ResetForm}
      */
     constructor(){
-        super({submitRequest: Routes.reset});
+        super({submitRequest: Routes.resetPassword});
         return this;
     }
 }

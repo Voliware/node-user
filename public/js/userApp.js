@@ -7,19 +7,15 @@ class UserApp extends EventSystem {
 
     /**
      * Constructor
-     * @param {object} [options={}]
-     * @param {boolean} [options.cookieLogin=true]
-     * @return {UserApp}
+     * @returns {UserApp}
      */
-    constructor(options = {}){
+    constructor(){
         super();
         let self = this;
 
-        // settings
-        this.cookieLogin = options.cookieLogin ? options.cookieLogin : true;
-
         // elements 
         this.wrapper = Template.selectFirst('#user-app');
+        this.feedback = Template.selectFirst('#user-feedback');
         this.loginForm = Template.selectFirst('#user-login-form');
         this.registerForm = Template.selectFirst('#user-register-form');
         this.resetForm = Template.selectFirst('#user-reset-form');
@@ -33,14 +29,12 @@ class UserApp extends EventSystem {
             self.logout();
         });
 
-        // handlers
-        this.loginForm.on('success', function(){
-            self.displayComponent('logout');
-        }); 
-        this.registerForm.on('success', function(){
-            self.displayComponent('logout');
-        });
+        // attach form handlers
+        this.attachLoginFormHandlers();
+        this.attachRegisterFormHandlers();
+        this.attachResetFormHandlers();
 
+        // attach link handlers
         Template.on(this.loginLink, 'click', function(){
             self.displayComponent('login');
             self.displayLinks('login');
@@ -57,9 +51,62 @@ class UserApp extends EventSystem {
     }
 
     /**
+     * Attach handlers to the login form.
+     * @returns {UserApp}
+     */
+    attachLoginFormHandlers(){
+        let self = this;
+        this.loginForm.on('success', function(){
+            self.displayComponent('logout');
+            self.feedback.renderSuccess('Logged in successfully');
+            self.feedback.show();
+        }); 
+        this.loginForm.on('fail', function(){
+            self.feedback.renderError('Failed to login');
+            self.feedback.show();
+        }); 
+        return this;
+    }
+
+    /**
+     * Attach handlers to the register form.
+     * @returns {UserApp}
+     */
+    attachRegisterFormHandlers(){
+        let self = this;
+        this.registerForm.on('success', function(){
+            self.displayComponent('logout');
+            self.feedback.renderSuccess('Registered successfully');
+            self.feedback.show();
+        });
+        this.registerForm.on('fail', function(){
+            self.feedback.renderError('Failed to register');
+            self.feedback.show();
+        }); 
+        return this;
+    }
+
+    /**
+     * Attach handlers to the reset password form.
+     * @returns {UserApp}
+     */
+    attachResetFormHandlers(){
+        let self = this;
+        this.resetForm.on('success', function(){
+            self.feedback.renderSuccess('Reset password successfully');
+            self.feedback.show();
+        });
+        this.resetForm.on('fail', function(){
+            self.feedback.renderError('Failed to reset password');
+            self.feedback.show();
+        }); 
+        return this;
+    }
+
+    /**
      * Set the user data
      * @param {object} data
-     * @return {UserApp}
+     * @returns {UserApp}
      */
     setUserData(data){
         this.user.set(data);
@@ -69,7 +116,7 @@ class UserApp extends EventSystem {
     /**
      * Render the user element
      * @param {object} data
-     * @return {UserApp}
+     * @returns {UserApp}
      */
     render(data){
         this.userElement.render(data);
@@ -79,7 +126,7 @@ class UserApp extends EventSystem {
     /**
      * Toggle the display of the module
      * @param {boolean} state
-     * @return {UserApp}
+     * @returns {UserApp}
      */
     display(state){
         Template.display(this.wrapper, state);
@@ -89,7 +136,7 @@ class UserApp extends EventSystem {
     /**
      * Toggle the display of the components
      * @param {string} component - the component to show, hide the rest
-     * @return {UserApp}
+     * @returns {UserApp}
      */
     displayComponent(component){
         switch(component){
@@ -118,7 +165,7 @@ class UserApp extends EventSystem {
     /**
      * Toggle the display of the forms
      * @param {string} form - the form to show, hide the rest
-     * @return {UserApp}
+     * @returns {UserApp}
      */
     displayForm(form){
         switch(form){
@@ -155,7 +202,7 @@ class UserApp extends EventSystem {
     /**
      * Toggle the display of the links
      * @param {string} links - the link to show, hide the rest
-     * @return {UserApp}
+     * @returns {UserApp}
      */
     displayLinks(links){
         switch(links){
@@ -188,10 +235,10 @@ class UserApp extends EventSystem {
     /**
      * Login with no parameters,
      * which will use a sessionId cookie on the backend.
-     * @return {Promise}
+     * @returns {Promise}
      */
     async loginWithSessionId(){
-        let response = await Routes.login();
+        let response = await Routes.loginWithCookie();
         if(response.status === 200){
             this.displayComponent('logout');
         }
@@ -202,7 +249,7 @@ class UserApp extends EventSystem {
 
     /**
      * Logout.
-     * @return {Promise}
+     * @returns {Promise}
      */
     async logout(){
         let response = await Routes.logout();
@@ -217,7 +264,7 @@ class UserApp extends EventSystem {
      * the login, register, and reset forms.
      * If cookie does not exist, emits login.required
      * and displays the login form.
-     * @return {Promise}
+     * @returns {Promise}
      */
     initialize(){
         return this.loginWithSessionId();

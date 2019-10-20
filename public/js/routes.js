@@ -1,18 +1,43 @@
+/**
+ * Static backend routes.
+ */
 class Routes {
+
+    /**
+     * Get all users.
+     * Must be logged in with appropriate priviledges.
+     * @returns {Promise}
+     */
     static getUsers(){
         return fetch("/users")
             .catch(function(err){
                 console.error(err);
             });
     }
+
+    /**
+     * Get a user.
+     * Must be logged in with appropriate priviledges.
+     * @param {string} userId 
+     * @returns {Promise}
+     */
     static getUser(userId){
         return fetch(`/user/${userId}`)
             .catch(function(err){
                 console.error(err);
             });
     }
-    static addUser(user){
-        let body = JSON.stringify(user);
+    
+    /**
+     * Add a user.
+     * @param {object} params
+     * @param {string} params.username
+     * @param {string} params.email
+     * @param {string} params.password
+     * @returns {Promise}
+     */
+    static addUser({username, email, password}){
+        let body = JSON.stringify({username, email, password});
         return fetch("/user", {
             method: "post",
             body: body
@@ -20,6 +45,13 @@ class Routes {
             console.error(err);
         });
     }
+
+    /**
+     * Delete a user.
+     * Must be logged in with appropriate priviledges.
+     * @param {string} userId 
+     * @returns {Promise}
+     */
     static deleteUser(userId){
         return fetch(`/user/${userId}`, {
             method: "delete"
@@ -27,8 +59,21 @@ class Routes {
             console.error(err);
         });
     }
-    static updateUser(user){
-        let body = JSON.stringify(user);
+    
+    /**
+     * Update a user.
+     * Note: password params is "older" and "newer"
+     * because "new" cannot be used.
+     * @param {object} params
+     * @param {string} params.username
+     * @param {string} params.email
+     * @param {object} params.password
+     * @param {string} params.password.older
+     * @param {string} params.password.newer
+     * @returns {Promise}
+     */
+    static updateUser({username, email, password: {older, newer}}){
+        let body = JSON.stringify({username, email, password: {older, newer}});
         return fetch("/user", {
             method: "put",
             body: body
@@ -36,8 +81,16 @@ class Routes {
             console.error(err);
         });
     }
-    static login(data){
-        let body = JSON.stringify(data);
+    
+    /**
+     * Login a user
+     * @param {object} params
+     * @param {string} params.username
+     * @param {string} params.password
+     * @returns {Promise}
+     */
+    static login({username, password}){
+        let body = JSON.stringify({username, password});
         return fetch("/user/login", {
             method: "post",
             body: body
@@ -45,6 +98,25 @@ class Routes {
             console.error(err);
         });
     }
+
+    /**
+     * Login a user with no parameters.
+     * Relies on a browser cookie being read.
+     * @returns {Promise}
+     */
+    static loginWithCookie(){
+        return fetch("/user/login", {
+            method: "post",
+        }).catch(function(err){
+            console.error(err);
+        });
+    }
+
+    /**
+     * Logout a user.
+     * Only works if the user is logged in.
+     * @returns {Promise}
+     */
     static logout(){
         return fetch("/user/logout", {
             method: "post"
@@ -52,8 +124,17 @@ class Routes {
             console.error(err);
         });
     }
-    static register(user){
-        let body = JSON.stringify(user);
+
+    /**
+     * Register a user
+     * @param {object} params
+     * @param {string} params.username
+     * @param {string} params.email
+     * @param {string} params.password
+     * @returns {Promise}
+     */
+    static register({username, email, password}){
+        let body = JSON.stringify({username, email, password});
         return fetch("/user/register", {
             method: "post",
             body: body
@@ -61,7 +142,14 @@ class Routes {
             console.error(err);
         });
     }
-    static resetPassword(email){
+
+    /**
+     * Reset a user's password
+     * @param {object} params
+     * @param {string} params.email
+     * @returns {Promise}
+     */
+    static resetPassword({email}){
         let body = JSON.stringify({email});
         return fetch("/user/reset", {
             method: "post",

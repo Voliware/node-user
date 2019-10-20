@@ -6,7 +6,7 @@ class LoginForm extends FormTemplate {
 
     /**
      * Constructor
-     * @return {LoginForm}
+     * @returns {LoginForm}
      */
     constructor(){
         super({submitRequest: Routes.login});

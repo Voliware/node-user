@@ -5,7 +5,7 @@ class User {
 
     /**
      * Constructor
-     * @return {User}
+     * @returns {User}
      */
     constructor(){
         this.username = "";

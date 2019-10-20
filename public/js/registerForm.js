@@ -6,7 +6,7 @@ class RegisterForm extends FormTemplate {
 
     /**
      * Constructor
-     * @return {RegisterForm}
+     * @returns {RegisterForm}
      */
     constructor(){
         super({submitRequest: Routes.register});

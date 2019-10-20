@@ -6,7 +6,7 @@ class UserTemplate extends Template {
 
     /**
      * Constructor
-     * @return {UserTemplate}
+     * @returns {UserTemplate}
      */
     constructor(){
         super({
@@ -23,7 +23,7 @@ class UserTemplate extends Template {
 
     /**
      * Attach handlers to the template.
-     * @return {UserTemplate}
+     * @returns {UserTemplate}
      */
     attachHandlers(){
         let self = this;
