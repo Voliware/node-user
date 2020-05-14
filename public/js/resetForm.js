@@ -13,4 +13,4 @@ class ResetForm extends FormTemplate {
         return this;
     }
 }
-customElements.define('template-form-reset', ResetForm);
+customElements.define('template-user-reset', ResetForm);

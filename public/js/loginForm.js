@@ -13,4 +13,4 @@ class LoginForm extends FormTemplate {
         return this;
     }
 }
-customElements.define('template-form-login', LoginForm);
+customElements.define('template-user-login', LoginForm);

@@ -26,9 +26,8 @@ class UserTemplate extends Template {
      * @returns {UserTemplate}
      */
     attachHandlers(){
-        let self = this;
-        Template.on(this.elements.logout, "click", function(){
-            self.emit('logout');
+        Template.on(this.elements.logout, "click", () => {
+            this.emit('logout');
         });
         return this;
     }

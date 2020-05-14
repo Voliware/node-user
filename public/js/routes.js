@@ -10,7 +10,7 @@ class Routes {
      */
     static getUsers(){
         return fetch("/users")
-            .catch(function(err){
+            .catch((err) => {
                 console.error(err);
             });
     }
@@ -23,7 +23,7 @@ class Routes {
      */
     static getUser(userId){
         return fetch(`/user/${userId}`)
-            .catch(function(err){
+            .catch((err) => {
                 console.error(err);
             });
     }
@@ -41,7 +41,7 @@ class Routes {
         return fetch("/user", {
             method: "post",
             body: body
-        }).catch(function(err){
+        }).catch((err) => {
             console.error(err);
         });
     }
@@ -55,7 +55,7 @@ class Routes {
     static deleteUser(userId){
         return fetch(`/user/${userId}`, {
             method: "delete"
-        }).catch(function(err){
+        }).catch((err) => {
             console.error(err);
         });
     }
@@ -77,7 +77,7 @@ class Routes {
         return fetch("/user", {
             method: "put",
             body: body
-        }).catch(function(err){
+        }).catch((err) => {
             console.error(err);
         });
     }
@@ -94,7 +94,7 @@ class Routes {
         return fetch("/user/login", {
             method: "post",
             body: body
-        }).catch(function(err){
+        }).catch((err) => {
             console.error(err);
         });
     }
@@ -107,7 +107,7 @@ class Routes {
     static loginWithCookie(){
         return fetch("/user/login", {
             method: "post",
-        }).catch(function(err){
+        }).catch((err) => {
             console.error(err);
         });
     }
@@ -120,7 +120,7 @@ class Routes {
     static logout(){
         return fetch("/user/logout", {
             method: "post"
-        }).catch(function(err){
+        }).catch((err) => {
             console.error(err);
         });
     }
@@ -138,7 +138,7 @@ class Routes {
         return fetch("/user/register", {
             method: "post",
             body: body
-        }).catch(function(err){
+        }).catch((err) => {
             console.error(err);
         });
     }
@@ -154,7 +154,7 @@ class Routes {
         return fetch("/user/reset", {
             method: "post",
             body: body
-        }).catch(function(err){
+        }).catch((err) => {
             console.error(err);
         });
     }

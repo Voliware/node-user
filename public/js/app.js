@@ -1,2 +1,2 @@
-let app = new UserApp();
+let app = Template.selectFirst('template-user-app');
 app.initialize();

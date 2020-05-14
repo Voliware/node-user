@@ -3,7 +3,7 @@ html {
     font-family: sans-serif;
 }
 /* app */
-#user-app{
+template-user-app{
     margin:auto;
     max-width:400px;
 }
@@ -19,7 +19,7 @@ html {
 .user-form-links {
     padding: 0 20px;
 }
-#user-links a {
+template-user-links a {
     color: #1f3e5d;
 }
 /* forms */

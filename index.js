@@ -11,8 +11,10 @@ module.exports = {
     UserAppRestInterface,
     UserDatabase,
     UserSession,
+    // front end components
     public: {
-        js: Path.join(__dirname, "/public/js/app.min.js"),
-        css: Path.join(__dirname, "/public/css/style.min.js")
+        js: Path.join(__dirname, "/public/js/user-app.min.js"),
+        css: Path.join(__dirname, "/public/css/user-style.min.js"),
+        html: Path.join(__dirname, "/public/html/user-app.html")
     }
 };

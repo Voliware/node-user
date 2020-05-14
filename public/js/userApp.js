@@ -1,9 +1,9 @@
 /**
  * User login, registration, and password reset UI.
  * Manages a user object and related cookies.
- * @extends {EventSystem}
+ * @extends {Template}
  */
-class UserApp extends EventSystem {
+class UserApp extends Template {
 
     /**
      * Constructor
@@ -11,22 +11,21 @@ class UserApp extends EventSystem {
      */
     constructor(){
         super();
-        let self = this;
 
         // elements 
-        this.wrapper = Template.selectFirst('#user-app');
-        this.feedback = Template.selectFirst('#user-feedback');
-        this.loginForm = Template.selectFirst('#user-login-form');
-        this.registerForm = Template.selectFirst('#user-register-form');
-        this.resetForm = Template.selectFirst('#user-reset-form');
-        this.loginLink = Template.selectFirst('#user-login-link');
-        this.registerLink = Template.selectFirst('#user-register-link');
-        this.resetPasswordLink = Template.selectFirst('#user-reset-link');
+        this.wrapper = Template.selectFirst('template-user-app');
+        this.feedback = Template.selectFirst('template-feedback');
+        this.loginForm = Template.selectFirst('template-user-login');
+        this.registerForm = Template.selectFirst('template-user-register');
+        this.resetForm = Template.selectFirst('template-user-reset');
+        this.loginLink = Template.selectFirst('.user-login-link');
+        this.registerLink = Template.selectFirst('.user-register-link');
+        this.resetPasswordLink = Template.selectFirst('.user-reset-link');
         
         this.user = new User();
-        this.userElement = Template.selectFirst('#user');
-        this.userElement.on('logout', function(){
-            self.logout();
+        this.userElement = Template.selectFirst('template-user');
+        this.userElement.on('logout', () => {
+            this.logout();
         });
 
         // attach form handlers
@@ -35,17 +34,17 @@ class UserApp extends EventSystem {
         this.attachResetFormHandlers();
 
         // attach link handlers
-        Template.on(this.loginLink, 'click', function(){
-            self.displayComponent('login');
-            self.displayLinks('login');
+        Template.on(this.loginLink, 'click', () => {
+            this.displayComponent('login');
+            this.displayLinks('login');
         });
-        Template.on(this.resetPasswordLink, 'click', function(){
-            self.displayComponent('reset');
-            self.displayLinks('reset');
+        Template.on(this.resetPasswordLink, 'click', () => {
+            this.displayComponent('reset');
+            this.displayLinks('reset');
         });
-        Template.on(this.registerLink, 'click', function(){
-            self.displayComponent('register');
-            self.displayLinks('register');
+        Template.on(this.registerLink, 'click', () => {
+            this.displayComponent('register');
+            this.displayLinks('register');
         });
         return this;
     }
@@ -55,15 +54,14 @@ class UserApp extends EventSystem {
      * @returns {UserApp}
      */
     attachLoginFormHandlers(){
-        let self = this;
-        this.loginForm.on('success', function(){
-            self.displayComponent('logout');
-            self.feedback.renderSuccess('Logged in successfully');
-            self.feedback.show();
+        this.loginForm.on('success', () => {
+            this.displayComponent('logout');
+            this.feedback.renderSuccess('Logged in successfully');
+            this.feedback.show();
         }); 
-        this.loginForm.on('fail', function(){
-            self.feedback.renderError('Failed to login');
-            self.feedback.show();
+        this.loginForm.on('fail', () => {
+            this.feedback.renderError('Failed to login');
+            this.feedback.show();
         }); 
         return this;
     }
@@ -73,15 +71,14 @@ class UserApp extends EventSystem {
      * @returns {UserApp}
      */
     attachRegisterFormHandlers(){
-        let self = this;
-        this.registerForm.on('success', function(){
-            self.displayComponent('logout');
-            self.feedback.renderSuccess('Registered successfully');
-            self.feedback.show();
+        this.registerForm.on('success', () => {
+            this.displayComponent('logout');
+            this.feedback.renderSuccess('Registered successfully');
+            this.feedback.show();
         });
-        this.registerForm.on('fail', function(){
-            self.feedback.renderError('Failed to register');
-            self.feedback.show();
+        this.registerForm.on('fail', () => {
+            this.feedback.renderError('Failed to register');
+            this.feedback.show();
         }); 
         return this;
     }
@@ -91,14 +88,13 @@ class UserApp extends EventSystem {
      * @returns {UserApp}
      */
     attachResetFormHandlers(){
-        let self = this;
-        this.resetForm.on('success', function(){
-            self.feedback.renderSuccess('Reset password successfully');
-            self.feedback.show();
+        this.resetForm.on('success', () => {
+            this.feedback.renderSuccess('Reset password successfully');
+            this.feedback.show();
         });
-        this.resetForm.on('fail', function(){
-            self.feedback.renderError('Failed to reset password');
-            self.feedback.show();
+        this.resetForm.on('fail', () => {
+            this.feedback.renderError('Failed to reset password');
+            this.feedback.show();
         }); 
         return this;
     }
@@ -270,3 +266,4 @@ class UserApp extends EventSystem {
         return this.loginWithSessionId();
     }
 }
+customElements.define('template-user-app', UserApp);

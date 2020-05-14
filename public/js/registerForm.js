@@ -13,4 +13,4 @@ class RegisterForm extends FormTemplate {
         return this;
     }
 }
-customElements.define('template-form-register', RegisterForm);
+customElements.define('template-user-register', RegisterForm);
