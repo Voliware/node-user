@@ -6,7 +6,7 @@ const UserAppRestInterface = require('./lib/userAppRestInterface');
 const httpServer = new NodeServer.HttpServer({
     name: "UserServer",
     port: 80,
-    publicPath: Path.join(__dirname, "public")
+    public_path: Path.join(__dirname, "public")
 });
 const app = new UserApp();
 const api = new UserAppRestInterface(app, httpServer);
