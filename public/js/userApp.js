@@ -7,7 +7,6 @@ class UserApp extends Template {
 
     /**
      * Constructor
-     * @returns {UserApp}
      */
     constructor(){
         super();
@@ -46,12 +45,10 @@ class UserApp extends Template {
             this.displayComponent('register');
             this.displayLinks('register');
         });
-        return this;
     }
 
     /**
      * Attach handlers to the login form.
-     * @returns {UserApp}
      */
     attachLoginFormHandlers(){
         this.loginForm.on('success', () => {
@@ -63,12 +60,10 @@ class UserApp extends Template {
             this.feedback.renderError('Failed to login');
             this.feedback.show();
         }); 
-        return this;
     }
 
     /**
      * Attach handlers to the register form.
-     * @returns {UserApp}
      */
     attachRegisterFormHandlers(){
         this.registerForm.on('success', () => {
@@ -80,12 +75,10 @@ class UserApp extends Template {
             this.feedback.renderError('Failed to register');
             this.feedback.show();
         }); 
-        return this;
     }
 
     /**
      * Attach handlers to the reset password form.
-     * @returns {UserApp}
      */
     attachResetFormHandlers(){
         this.resetForm.on('success', () => {
@@ -96,43 +89,35 @@ class UserApp extends Template {
             this.feedback.renderError('Failed to reset password');
             this.feedback.show();
         }); 
-        return this;
     }
 
     /**
      * Set the user data
-     * @param {object} data
-     * @returns {UserApp}
+     * @param {Object} data
      */
     setUserData(data){
         this.user.set(data);
-        return this;
     }
 
     /**
      * Render the user element
-     * @param {object} data
-     * @returns {UserApp}
+     * @param {Object} data
      */
     render(data){
         this.userElement.render(data);
-        return this;
     }
 
     /**
      * Toggle the display of the module
-     * @param {boolean} state
-     * @returns {UserApp}
+     * @param {Boolean} state
      */
     display(state){
         Template.display(this.wrapper, state);
-        return this;
     }
 
     /**
      * Toggle the display of the components
-     * @param {string} component - the component to show, hide the rest
-     * @returns {UserApp}
+     * @param {String} component - the component to show, hide the rest
      */
     displayComponent(component){
         switch(component){
@@ -154,14 +139,11 @@ class UserApp extends Template {
                 this.displayLinks('login');
                 break;
         }
-
-        return this;
     }
 
     /**
      * Toggle the display of the forms
-     * @param {string} form - the form to show, hide the rest
-     * @returns {UserApp}
+     * @param {String} form - the form to show, hide the rest
      */
     displayForm(form){
         switch(form){
@@ -191,14 +173,11 @@ class UserApp extends Template {
                 this.loginForm.show();
                 break;
         }
-
-        return this;
     }
 
     /**
      * Toggle the display of the links
-     * @param {string} links - the link to show, hide the rest
-     * @returns {UserApp}
+     * @param {String} links - the link to show, hide the rest
      */
     displayLinks(links){
         switch(links){
@@ -224,22 +203,24 @@ class UserApp extends Template {
                 Template.show(this.resetPasswordLink);
                 break;
         }
-        
-        return this;
     }
 
     /**
-     * Login with no parameters,
-     * which will use a sessionId cookie on the backend.
+     * Login with no parameters, which will 
+     * use a sessionId cookie on the backend.
+     * Emits 'login.cookie.success' on success.
+     * Emits 'login.cookie.fail' on failure.
      * @returns {Promise}
      */
-    async loginWithSessionId(){
+    async loginWithCookie(){
         let response = await Routes.loginWithCookie();
         if(response.status === 200){
             this.displayComponent('logout');
+            this.emit('login.cookie.success');
         }
         else {
             this.displayComponent('login');
+            this.emit('login.cookie.fail');
         }
     }
 
@@ -256,14 +237,10 @@ class UserApp extends Template {
 
     /**
      * Initialize by trying to login with a cookie.
-     * If successful, emits login.success and hides 
-     * the login, register, and reset forms.
-     * If cookie does not exist, emits login.required
-     * and displays the login form.
      * @returns {Promise}
      */
     initialize(){
-        return this.loginWithSessionId();
+        return this.loginWithCookie();
     }
 }
 customElements.define('template-user-app', UserApp);

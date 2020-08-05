@@ -3,11 +3,12 @@ const Path = require('path');
 const UserApp = require('./lib/userApp');
 const UserAppRestInterface = require('./lib/userAppRestInterface');
 
-const httpServer = new NodeServer.HttpServer({
+const http_server = new NodeServer.HttpServer({
     name: "UserServer",
     port: 80,
     public_path: Path.join(__dirname, "public")
 });
 const app = new UserApp();
-const api = new UserAppRestInterface(app, httpServer);
-api.initialize();
+const api = new UserAppRestInterface(app, http_server);
+app.initialize();
+http_server.start();
