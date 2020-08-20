@@ -14,7 +14,7 @@
     "@voliware/logger": "^1.5.2",
     "@voliware/node-server": "^2.2.1",
     "@voliware/template2": "^1.2.0",
-    "bcrypt": "4.0.0",
+    "bcrypt": "5.0.0",
     "cookies": "^0.8.0",
     "mongodb": "^3.5.9",
     "nodemailer": "^6.4.10",
